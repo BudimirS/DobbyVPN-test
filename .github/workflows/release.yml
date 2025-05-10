@@ -64,204 +64,6 @@ jobs:
           name: go_client_android.aar
           path: go_client_android.aar
 
-  windows_build:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        go-version: ["1.23.2"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-
-      - name: Install dependencies
-        run: |
-          cd src
-          cd ..
-
-      - name: Install submodules
-        run: |
-          git submodule add https://github.com/cbeuw/Cloak
-          git submodule init
-          git submodule update
-          # mv -Force log-files/piper.go Cloak/internal/client/piper.go
-          # mv -Force log-files/connector.go Cloak/internal/client/connector.go
-          # mv -Force log-files/TLS.go Cloak/internal/client/TLS.go
-          # mv -Force log-files/copy.go Cloak/internal/common/copy.go
-
-      - name: Clone ck-client
-        run: |
-          mkdir Cloak/internal/out
-          cp log-files/logging.go Cloak/internal/out/logging.go
-          cp -r ck-client/Windows Cloak
-          cp -r ck-client/WindowsTunnelService Cloak/Windows/WindowsTunnelService
-          cp ck-client/app.go Cloak/Windows
-          cp ck-client/ck-client.go Cloak/Windows
-          cp ck-client/Icon.png Cloak/Windows
-          cp ck-client/log_android.go Cloak/Windows
-          cp ck-client/outline_device.go Cloak/Windows
-          cp ck-client/outline_packet_proxy.go Cloak/Windows
-          cp ck-client/protector.go Cloak/Windows
-
-      - name: Install Go dependencies
-        run: |
-          cd Cloak/Windows
-          go get github.com/amnezia-vpn/amneziawg-windows/tunnel@v0.1.4-0.20240526104134-db18f2297e5e
-          go mod tidy
-          go install fyne.io/fyne/v2/cmd/fyne@latest
-          cd ../..
-
-      - name: Build Windows tunnel service
-        run: |
-          cd Cloak/Windows/WindowsTunnelService
-          go build -o tunnel-service.exe .
-          cd ../../../
-
-      - name: Build windows client
-        run: |
-          cd Cloak/Windows
-          fyne package -os windows
-          cd ../..
-
-      - name: Make Windows zip
-        run: |
-          mkdir dobbyvpn-windows-amd64
-          mkdir dobbyvpn-windows-amd64/libs
-          cp Cloak/Windows/WindowsTunnelService/tunnel-service.exe dobbyvpn-windows-amd64/libs/tunnel-service.exe
-          cp Cloak/Windows/Windows.exe dobbyvpn-windows-amd64/dobbyvpn-windows.exe
-          Compress-Archive dobbyvpn-windows-amd64 dobbyvpn-windows-amd64.zip
-
-      - name: Upload Windows client
-        uses: actions/upload-artifact@master
-        with:
-          name: dobbyvpn-windows-amd64.zip
-          path: dobbyvpn-windows-amd64.zip
-
-  linux_build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ["1.23.2"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-      - name: Install dependencies
-        run: |
-          cd src
-          go get ./...
-          cd ..
-          sudo apt-get install golang gcc libgl1-mesa-dev xorg-dev
-          sudo apt-get install gcc-multilib
-          sudo apt-get install gcc-mingw-w64
-      - name: Clone Cloak and copying ck-client
-        run: |
-          git submodule add https://github.com/cbeuw/Cloak
-          git submodule init
-          git submodule update
-          # mv -f log-files/piper.go Cloak/internal/client/piper.go
-          # mv -f log-files/connector.go Cloak/internal/client/connector.go
-          # mv -f log-files/TLS.go Cloak/internal/client/TLS.go
-          # mv -f log-files/copy.go Cloak/internal/common/copy.go
-          mkdir Cloak/internal/out
-          cp log-files/logging.go Cloak/internal/out/logging.go
-          
-          cp -r ck-client/Linux Cloak
-          cp ck-client/Linux/awgconf/*.go Cloak/Linux/
-          cp ck-client/Linux/awgconf/*.go Cloak/Linux/tunnel/
-          
-          cp ck-client/app.go Cloak/Linux
-          cp ck-client/ck-client.go Cloak/Linux
-          cp ck-client/Icon.png Cloak/Linux
-          cp ck-client/log_android.go Cloak/Linux
-          cp ck-client/outline_device.go Cloak/Linux
-          cp ck-client/outline_packet_proxy.go Cloak/Linux
-          cp ck-client/protector.go Cloak/Linux
-          
-          cd Cloak/Linux
-          go mod tidy
-          cd ../..
-      - name: Build linux ck-client
-        run: |
-          cd Cloak/Linux
-
-          cd tunnel/
-          go build -o tunnel-service .
-          cd ../
-
-          go build -o dobbyvpn-linux-amd64 .
-          cd ../../
-      - name: Make linux zip
-        run: |
-          mkdir dobbyvpn-linux-amd64
-          mkdir dobbyvpn-linux-amd64/libs/
-          mv Cloak/Linux/dobbyvpn-linux-amd64 dobbyvpn-linux-amd64/dobbyvpn-linux-amd64
-          mv Cloak/Linux/tunnel/tunnel-service dobbyvpn-linux-amd64/libs/tunnel-service
-          zip -r dobbyvpn-linux-amd64.zip dobbyvpn-linux-amd64
-      - name: Upload Linux client
-        uses: actions/upload-artifact@master
-        with:
-          name: dobbyvpn-linux-amd64.zip
-          path: dobbyvpn-linux-amd64.zip
-
-  macos_build_arm64:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        go-version: ["1.23.2"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.22.x"
-      - name: Clone Cloak and copying ck-client
-        run: |
-          git submodule add https://github.com/cbeuw/Cloak
-          git submodule init
-          git submodule update
-          # mv -f log-files/piper.go Cloak/internal/client/piper.go
-          # mv -f log-files/connector.go Cloak/internal/client/connector.go
-          # mv -f log-files/TLS.go Cloak/internal/client/TLS.go
-          # mv -f log-files/copy.go Cloak/internal/common/copy.go
-          mkdir Cloak/internal/out
-          cp log-files/logging.go Cloak/internal/out/logging.go
-          cp -r ck-client/MacOs Cloak
-          cp ck-client/app.go Cloak/MacOs
-          cp ck-client/ck-client.go Cloak/MacOs
-          cp ck-client/Icon.png Cloak/MacOs
-          cp ck-client/log_android.go Cloak/MacOs
-          cp ck-client/outline_device.go Cloak/MacOs
-          cp ck-client/outline_packet_proxy.go Cloak/MacOs
-          cp ck-client/protector.go Cloak/MacOs
-          cd Cloak
-          git clone --branch v1.6.0 https://github.com/database64128/swgp-go.git
-          echo "replace github.com/database64128/swgp-go v1.6.0 => ./swgp-go" >> go.mod
-          cd ..
-          cd Cloak/MacOs
-          go mod tidy
-          cd ../..
-
-      - name: Build macos ck-client
-        run: |
-          cd Cloak/MacOs
-          go build -o dobbyvpn-darwin-arm64 .
-      - name: Upload MacOs client
-        uses: actions/upload-artifact@master
-        with:
-          name: dobbyvpn-darwin-arm64
-          path: Cloak/MacOs/dobbyvpn-darwin-arm64
-
   android_build:
     needs: prepare_go_client_android
     runs-on: ubuntu-latest
@@ -477,6 +279,124 @@ jobs:
 #            --ipa ck-android/CkClient/iosApp/build/ipa/*.ipa \
 #            --api_key_path api_key.json
 #          rm -f api_key.json
+
+  build_desktops:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          check-latest: true
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: >
+            ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', '**/libs.versions.toml') }}
+
+      - name: Build with Gradle
+        run: |
+          cd ck-client-desktop-kotlin/Client
+          chmod +x ./gradlew
+          ./gradlew build
+          ls /home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains.skiko
+
+      - name: Conveyor build site
+        uses: hydraulic-software/conveyor/actions/build@v16.0
+        env:
+          OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          command: make site
+          extra_flags: "--passphrase=\"${{ secrets.CONVEYOR_PASSPHRASE }}\" -f ck-client-desktop-kotlin/Client/conveyor.conf"
+          signing_key: ${{ secrets.SIGNING_KEY }}
+          agree_to_license: 1
+
+      - name: Display file tree with sizes after Linux build
+        run: |
+          echo "Displaying the size of files and directories in 'output' directory:"
+          du -ah output | sort -rh
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "v${{ github.run_number }}"
+          release_name: "Release v${{ github.run_number }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Debian
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/debian/combined-vpn-client_1.0_amd64.deb
+          asset_name: combined-vpn-client-linux.deb
+          asset_content_type: application/deb
+
+      - name: Upload TarGz
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/combined-vpn-client-1.0-linux-amd64.tar.gz
+          asset_name: combined-vpn-client-linux.tar.gz
+          asset_content_type: application/tar_gz
+
+      - name: Upload MacOS aarch64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/combined-vpn-client-1.0-mac-aarch64.zip
+          asset_name: combined-vpn-client-mac-aarch64.zip
+          asset_content_type: application/mac_aarch64
+
+      - name: Upload MacOS amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/combined-vpn-client-1.0-mac-amd64.zip
+          asset_name: combined-vpn-client-mac-amd64.zip
+          asset_content_type: application/mac_amd64
+
+      - name: Upload Windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./output/combined-vpn-client-1.0.x64.msix
+          asset_name: combined-vpn-client-windows.msix
+          asset_content_type: application/windows
+
+      - name: Cleanup Conveyor
+        if: always()
+        run: |
+          rm -rf .conveyor/cache/*
+
+      - name: Display file tree with sizes after Windows build
+        run: |
+          echo "Displaying the size of files and directories in 'output' directory:"
+          du -ah output | sort -rh
+
+      - name: Delete output directory
+        run: rm -rf output
 
   release:
     runs-on: ubuntu-latest
