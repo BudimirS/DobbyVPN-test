@@ -1,6 +1,7 @@
 name: Build VPN Libraries
 
 on:
+  workflow_call:
   workflow_dispatch:
     inputs:
       release_tag:
@@ -94,6 +95,61 @@ jobs:
             go_client/lib_linux.so
             go_client/lib_mac.dylib
 
+  prepare_go_client_android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Vendor Cloak/internal
+        run: |
+          git clone --depth 1 https://github.com/cbeuw/Cloak tmp
+          mkdir -p go_client/modules/Cloak
+          cp -r tmp/internal go_client/modules/Cloak/
+          rm -rf tmp
+
+      - name: Download Go modules
+        run: |
+          cd go_client
+          go mod download
+          cd ..
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: >
+            platforms;android-35
+            build-tools;35.0.0
+            platform-tools
+
+      - name: Install gomobile & init
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init     
+
+      - name: Fetch gomobile runtime
+        run: |
+          cd go_client            
+          go get golang.org/x/mobile/bind@latest
+          cd ..
+
+      - name: Build Go AAR
+        run: |
+          cd go_client
+          gomobile bind -target=android -androidapi=26 -o ../go_client_android.aar ./kotlin_exports
+          cd ..
+
+      - name: Upload Go AAR
+        uses: actions/upload-artifact@master
+        with:
+          name: go_client_android.aar
+          path: go_client_android.aar
+
   release:
     if: ${{ github.event.inputs.release_tag != '' }}
     runs-on: ubuntu-latest
@@ -123,6 +179,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: lib_macos
+          path: release
+
+      - name: Download android library
+        uses: actions/download-artifact@v4
+        with:
+          name: go_client_android.aar
           path: release
 
       - name: Release
