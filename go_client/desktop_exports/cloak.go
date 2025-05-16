@@ -11,7 +11,7 @@ func StartCloakClient(localHost *C.char, localPort *C.char, config *C.char) {
 		C.GoString(localHost),
 		C.GoString(localPort),
 		C.GoString(config),
-		false
+		false,
 	)
 }
 
