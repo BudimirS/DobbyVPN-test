@@ -10,6 +10,7 @@ import (
 
 var outlineClient *outline.OutlineClient
 var outlineMu sync.Mutex
+var logFile *os.File
 
 //export StartOutline
 func StartOutline(key *C.char) {
