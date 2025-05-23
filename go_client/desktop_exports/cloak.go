@@ -6,7 +6,7 @@ import (
 )
 
 //export StartCloakClient
-func StartCloakClient(localHost *C.char, localPort *C.char, config *C.char, udp C.bool) {
+func StartCloakClient(localHost *C.char, localPort *C.char, config *C.char, false) {
 	cloak.StartCloakClient(
 		C.GoString(localHost),
 		C.GoString(localPort),
