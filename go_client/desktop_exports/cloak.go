@@ -1,6 +1,7 @@
 package main
 
 import (
+	"C"
 	"go_client/cloak"
 )
 
