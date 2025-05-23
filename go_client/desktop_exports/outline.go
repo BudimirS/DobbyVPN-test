@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"go_client/outline"
 	"sync"
+	"os"
 )
 
 var outlineClient *outline.OutlineClient
@@ -12,6 +13,13 @@ var outlineMu sync.Mutex
 
 //export StartOutline
 func StartOutline(key *C.char) {
+    var err error
+    logFile, err = os.OpenFile("outline.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+    if err != nil {
+    	log.Fatalf("Failed to open log file: %v", err)
+    }
+    log.SetOutput(logFile)
+
 	str_key := C.GoString(key)
 	keyPtr := &str_key
 
