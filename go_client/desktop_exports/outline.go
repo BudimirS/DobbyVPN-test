@@ -14,8 +14,7 @@ var logFile *os.File
 
 //export StartOutline
 func StartOutline(key *C.char) {
-    var err error
-    logFile, err = os.OpenFile("outline.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+    logFile, err := os.OpenFile("outline.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
     if err != nil {
     	log.Fatalf("Failed to open log file: %v", err)
     }
@@ -29,7 +28,7 @@ func StartOutline(key *C.char) {
 
 	if outlineClient != nil {
 		log.Infof("Disconnect existing outline client")
-		err := outlineClient.Disconnect()
+		err = outlineClient.Disconnect()
 		if err != nil {
 			log.Errorf("Failed to disconnect existing outline client: %v", err)
 			return
@@ -38,7 +37,7 @@ func StartOutline(key *C.char) {
 
 	outlineClient = outline.NewClient(keyPtr)
 	log.Infof("Connect outline client")
-	err := outlineClient.Connect()
+	err = outlineClient.Connect()
 	if err != nil {
 		log.Errorf("Failed to connect outline client: %v", err)
 	}
