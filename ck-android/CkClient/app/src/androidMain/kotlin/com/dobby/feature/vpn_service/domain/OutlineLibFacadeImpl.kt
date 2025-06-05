@@ -1,18 +1,19 @@
 package com.dobby.feature.vpn_service.domain
 
-import kotlin_exports.OutlineClient
+import cloak_outline.Cloak_outline
+import cloak_outline.OutlineDevice
 import com.dobby.feature.vpn_service.OutlineLibFacade
 
 internal class OutlineLibFacadeImpl: OutlineLibFacade {
 
-    private var device: OutlineClient? = null
+    private var device: OutlineDevice? = null
 
     override fun init(apiKey: String) {
-        device = OutlineClient(apiKey).apply { connect() }
+        device = Cloak_outline.newOutlineDevice(apiKey)
     }
 
     override fun disconnect() {
-        device?.disconnect()
+        TODO("Not yet implemented")
     }
 
     override fun writeData(data: ByteArray) {
