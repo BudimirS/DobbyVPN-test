@@ -61,7 +61,7 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
 
-            implementation(files("../libs/cloak_outline.aar"))
+            implementation(files("../libs/go_client_android.aar"))
         }
 
         commonMain.dependencies {
