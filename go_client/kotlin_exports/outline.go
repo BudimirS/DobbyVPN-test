@@ -3,7 +3,6 @@ package kotlin_exports
 import (
     "go_client/outline"
 	"log"
-	"fmt"
 )
 
 type OutlineClient struct {
