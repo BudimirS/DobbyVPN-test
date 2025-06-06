@@ -110,8 +110,10 @@ func (d *OutlineDevice) Read() ([]byte, error) {
 
 func (d *OutlineDevice) Write(buf []byte) (int, error) {
 	var n int
-	fmt.Println("outline client: before; writing data..., got", len(buf), "bytes")
-    n, err := d.IPDevice.Write(buf)
+	aligned := make([]byte, len(buf))
+    copy(aligned, buf)
+	fmt.Println("outline client: before; writing data..., got", len(aligned), "bytes")
+    n, err := d.IPDevice.Write(aligned)
 	fmt.Println("outline client: after; writing data..., got", n)
 	return n, err
 }
