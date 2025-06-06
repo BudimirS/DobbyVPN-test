@@ -53,7 +53,7 @@ func NewOutlineDevice(transportConfig string) (od *OutlineDevice, err error) {
 		return nil, fmt.Errorf("failed to configure lwIP: %w", err)
 	}
 
-	return
+	return od, nil
 }
 
 func (d *OutlineDevice) Close() error {
