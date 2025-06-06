@@ -36,7 +36,7 @@ func (c *OutlineClient) Read() ([]byte, error) {
 
 func (c *OutlineClient) Write(buf []byte) (int, error) {
 	log.Println("start Write(buf []byte)")
-	n, err c.OutlineClient.Write(buf)
+	n, err := c.OutlineClient.Write(buf)
 	log.Println("end Write(buf []byte)")
 	return n, err
 }
