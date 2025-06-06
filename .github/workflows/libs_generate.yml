@@ -133,7 +133,8 @@ jobs:
           echo "____________"
           go list -m all | grep 'golang.org/x/mobile'
           echo "____________"
-          gomobile bind -v -ldflags='' -target=android/arm64 -androidapi=21 -o ../go_client_android.aar ./kotlin_exports
+          export CGO_LDFLAGS="-O2 -g -s -w -Wl,-z,max-page-size=16384"
+          gomobile bind -v -target=android/arm64 -androidapi=21 -o ../go_client_android.aar ./kotlin_exports
           cd ..
 
       - name: Upload Go AAR
