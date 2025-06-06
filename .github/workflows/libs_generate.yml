@@ -142,6 +142,7 @@ jobs:
       - name: Build Go AAR
         run: |
           cd go_client
+          export CGO_LDFLAGS="-O2 -g -s -w -Wl,-z,max-page-size=16384"
           gomobile bind -target=android/arm64 -androidapi=28 -o ../go_client_android.aar ./kotlin_exports
           cd ..
 
