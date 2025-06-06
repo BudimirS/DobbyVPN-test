@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
+import android.util.Log.i
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -290,12 +291,15 @@ class DobbyVpnService : VpnService() {
 
                         if (length > 0) {
                             val packetData: ByteArray = buffer.array().copyOfRange(0, length)
+                            i("DOBBY_TAG", "start write")
                             outlineLibFacade.writeData(packetData)
+                            i("DOBBY_TAG", "end write")
                             // val hexString = packetData.joinToString(separator = " ") { byte -> "%02x".format(byte) }
                             // Logger.log("MyVpnService: Packet Data Written (Hex): $hexString")
                         }
                     } catch (e: Exception) {
                         logger.log("VpnService: Failed to write packet to Outline: ${e.message}")
+                        i("DOBBY_TAG_ERROR", "Error: ${e.message}")
                     }
                     buffer.clear()
                 }
@@ -355,7 +359,9 @@ class DobbyVpnService : VpnService() {
                         //}
                         //buffer.clear()
                         //Logger.log("MyVpnService: read packet from tunnel")
+                        i("DOBBY_TAG", "start read")
                         val packetData: ByteArray? = outlineLibFacade.readData()
+                        i("DOBBY_TAG", "end read")
 
                         packetData?.let {
                             outputStream?.write(it)
@@ -364,6 +370,7 @@ class DobbyVpnService : VpnService() {
                         } ?: Unit // Logger.log("No data read from Outline") TODO remove comment
                     } catch (e: Exception) {
                         logger.log("VpnService: Failed to read packet from tunnel: ${e.message}")
+                        i("DOBBY_TAG_ERROR", "Error: ${e.message}")
                     }
                     buffer.clear()
                 }

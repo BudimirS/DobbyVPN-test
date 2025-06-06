@@ -112,6 +112,7 @@ jobs:
             platforms;android-35
             build-tools;35.0.0
             platform-tools
+            ndk;27.0.0
 
       - name: Install gomobile & gobind and pin x/mobile version
         run: |
