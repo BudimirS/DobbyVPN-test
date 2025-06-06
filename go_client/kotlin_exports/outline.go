@@ -10,12 +10,17 @@ type OutlineClient struct {
 }
 
 func (c *OutlineClient) Connect() error {
-	log.Println("func (c *OutlineClient) Connect() error")
-	return c.OutlineClient.Connect()
+	log.Println("start Connect()")
+	err := c.OutlineClient.Connect()
+	log.Println("end Connect()")
+	return err
 }
 
 func (c *OutlineClient) Disconnect() error {
-	return c.OutlineClient.Disconnect()
+	log.Println("start Disconnect()")
+	err := c.OutlineClient.Disconnect()
+	log.Println("end Disconnect()")
+	return err
 }
 
 //func (c *OutlineClient) GetServerIP() net.IP {
@@ -23,18 +28,23 @@ func (c *OutlineClient) Disconnect() error {
 //}
 
 func (c *OutlineClient) Read() ([]byte, error) {
-	log.Println("func (c *OutlineClient) Read()")
-	return c.OutlineClient.Read()
+	log.Println("start Read()")
+	buf, err := c.OutlineClient.Read()
+	log.Println("end Read()")
+	return buf, err
 }
 
 func (c *OutlineClient) Write(buf []byte) (int, error) {
-	log.Println("func (c *OutlineClient) Write(buf []byte)")
-	return c.OutlineClient.Write(buf)
+	log.Println("start Write(buf []byte)")
+	n, err c.OutlineClient.Write(buf)
+	log.Println("end Write(buf []byte)")
+	return n, err
 }
 
 func NewOutlineClient(transportConfig string) *OutlineClient {
-	log.Println("Before func NewOutlineClient(transportConfig string) *OutlineClient")
+	log.Println("start func NewOutlineClient(transportConfig string)")
 	cl := outline.NewClient(transportConfig)
-	log.Println("After func NewOutlineClient(transportConfig string) *OutlineClient")
-	return &OutlineClient{OutlineClient: cl}
+	res := &OutlineClient{OutlineClient: cl}
+	log.Println("end func NewOutlineClient(transportConfig string)")
+	return res
 }
