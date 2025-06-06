@@ -99,7 +99,9 @@ func resolveShadowsocksServerIPFromConfig(transportConfig string) (net.IP, error
 
 func (d *OutlineDevice) Read() ([]byte, error) {
 	buf := make([]byte, 65536)
+	fmt.Println("outline client: before; read data...t")
 	n, err := d.IPDevice.Read(buf)
+	fmt.Println("outline client: after; read data..., got", n)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read data: %w", err)
 	}
@@ -108,7 +110,8 @@ func (d *OutlineDevice) Read() ([]byte, error) {
 
 func (d *OutlineDevice) Write(buf []byte) (int, error) {
 	var n int
-	fmt.Println("outline client: writing data..., got", len(buf), "bytes")
+	fmt.Println("outline client: before; writing data..., got", len(buf), "bytes")
     n, err := d.IPDevice.Write(buf)
+	fmt.Println("outline client: after; writing data..., got", n)
 	return n, err
 }
