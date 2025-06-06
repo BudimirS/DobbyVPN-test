@@ -8,6 +8,7 @@ import (
 	"go_client/outline/internal"
 	"log"
 	"net"
+	"unsafe"
 	//_ "go_client/logger"
 )
 
@@ -60,10 +61,26 @@ func (c *OutlineClient) GetServerIP() net.IP {
 }
 
 func (c *OutlineClient) Read() ([]byte, error) {
-	buf := make([]byte, 65536)
-	log.Println(fmt.Sprintf("outline client: read data; before; size: %d (%d)", len(buf), len(buf)%8))
+	// Allocate a buffer with extra space to ensure 8-byte alignment.
+	// The `bulkBarrierPreWrite: unaligned arguments` error suggests that the Go runtime's
+	// garbage collector write barrier might be encountering an unaligned address
+	// when processing the `buf` slice, especially when interacting with native code.
+	// By ensuring 8-byte alignment, we mitigate potential issues with memory access
+	// patterns expected by the underlying system or CGO calls.
+	const bufferSize = 65536
+	const alignment = 8
+	alignedBuf := make([]byte, bufferSize+alignment-1)
+
+	// Calculate the offset to achieve 8-byte alignment
+	offset := 0
+	if rem := uintptr(len(alignedBuf)) % alignment; rem != 0 {
+		offset = alignment - int(rem)
+	}
+	buf := alignedBuf[offset : offset+bufferSize]
+
+	log.Println(fmt.Sprintf("outline client: read data; before; size: %d (%d)", len(buf), uintptr(unsafe.Pointer(&buf[0]))%alignment))
 	n, err := c.device.Read(buf)
-	log.Println(fmt.Sprintf("outline client: read data; after; size: %d (%d)", n, n%8))
+	log.Println(fmt.Sprintf("outline client: read data; after; size: %d (%d)", n, uintptr(unsafe.Pointer(&buf[0]))%alignment))
 	if err != nil {
 		log.Printf("failed to read data: %v\n", err)
 		return nil, fmt.Errorf("failed to read data: %w", err)
