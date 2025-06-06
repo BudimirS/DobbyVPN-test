@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21.x"
+          go-version: "1.23.x"
 
       - name: Vendor Cloak/internal
         run: |
@@ -104,7 +104,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.15.x'
+          go-version: '1.23.x'
 
       - name: Vendor Cloak/internal
         run: |
@@ -123,8 +123,8 @@ jobs:
         uses: android-actions/setup-android@v3
         with:
           packages: >
-            platforms;android-34
-            build-tools;34.0.0
+            platforms;android-35
+            build-tools;35.0.0
             platform-tools
 
       - name: Install gomobile & init
@@ -142,7 +142,7 @@ jobs:
       - name: Build Go AAR
         run: |
           cd go_client
-          gomobile bind -target=android/arm64 -androidapi=26 -o ../go_client_android.aar ./kotlin_exports
+          gomobile bind -target=android/arm64 -androidapi=28 -o ../go_client_android.aar ./kotlin_exports
           cd ..
 
       - name: Upload Go AAR
